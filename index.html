@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tyrone Miller – WhatsApp and Telegram chatbots, automation</title>
+<meta name="description" content="Developer building WhatsApp and Telegram chatbots and business automations. Booking bots, support bots, lead handling and payment flows for small and mid-sized companies.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400&family=Newsreader:ital,opsz,wght@0,6..72,200..500;1,6..72,200..500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#303134;
+    --ink:#ecebe7;
+    --soft:rgba(236,235,231,.74);
+    --muted:#a2a29e;
+    --line:rgba(236,235,231,.16);
+    --serif:'Newsreader', Georgia, 'Times New Roman', serif;
+    --sans:'Hanken Grotesk', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --mono:'IBM Plex Mono', ui-monospace, Menlo, monospace;
+    --pad:clamp(20px, 3.4vw, 48px);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:17px;line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  a{color:inherit}
+  button,input,textarea{font:inherit;color:inherit}
+  :focus-visible{outline:2px solid var(--ink);outline-offset:4px}
+
+  #scene{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+  main,header,footer{position:relative;z-index:1}
+
+  /* header */
+  .top{position:fixed;top:0;left:0;right:0;z-index:5;display:flex;justify-content:space-between;align-items:center;padding:22px var(--pad)}
+  .brand{text-decoration:none;font-weight:500;font-size:15px;letter-spacing:.01em}
+  .brand span{color:var(--muted);font-weight:400;margin-left:14px}
+  .top nav{display:flex;gap:clamp(16px,2.6vw,36px)}
+  .top nav a{font-size:14px;text-decoration:none;color:var(--soft);transition:color .2s}
+  .top nav a:hover{color:var(--ink)}
+
+  /* hero */
+  .hero{min-height:100vh;min-height:100svh;display:flex;flex-direction:column;justify-content:flex-end;padding:120px var(--pad) clamp(32px,6vh,64px)}
+  .hero h1{font-family:var(--serif);font-weight:300;font-size:clamp(2.7rem,6.3vw,6.4rem);line-height:1.02;letter-spacing:-.025em;max-width:11.5em;font-variation-settings:'opsz' 72}
+  .hero-foot{display:flex;flex-wrap:wrap;gap:28px 64px;align-items:flex-end;justify-content:space-between;margin-top:clamp(28px,5vh,56px);padding-top:24px;border-top:1px solid var(--line)}
+  .hero-foot p{max-width:40ch;color:var(--soft)}
+  .hero-actions{display:flex;align-items:center;gap:28px;flex-wrap:wrap}
+  .btn{display:inline-block;background:var(--ink);color:var(--bg);text-decoration:none;padding:13px 24px;font-weight:500;font-size:15px;border:1px solid var(--ink);cursor:pointer;transition:background .2s,color .2s}
+  .btn:hover{background:transparent;color:var(--ink)}
+  .link{font-size:15px;text-decoration:underline;text-underline-offset:5px;text-decoration-color:var(--line);transition:text-decoration-color .2s}
+  .link:hover{text-decoration-color:var(--ink)}
+  .status{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--muted);margin-top:18px}
+  .dot{width:8px;height:8px;border-radius:50%;background:#9fd0a2;display:inline-block}
+
+  /* shared section layout */
+  .block{padding:clamp(88px,14vh,160px) var(--pad)}
+  .block-head{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap;margin-bottom:48px}
+  h2{font-family:var(--serif);font-weight:300;font-size:clamp(2rem,4.2vw,3.7rem);line-height:1.08;letter-spacing:-.02em;font-variation-settings:'opsz' 60}
+
+  /* work index */
+  .filters{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+  .filters button{background:none;border:0;padding:6px 12px;cursor:pointer;color:var(--muted);font-size:15px;border-bottom:1px solid transparent;transition:color .2s,border-color .2s}
+  .filters button:hover{color:var(--ink)}
+  .filters button[aria-pressed="true"]{color:var(--ink);border-color:var(--ink)}
+  .count{font-family:var(--mono);font-size:13px;color:var(--muted);margin-left:14px}
+
+  .list{border-bottom:1px solid var(--line)}
+  .row[hidden]{display:none}
+  .row-btn{display:grid;grid-template-columns:4.5rem 14rem 1fr 17rem 2rem;gap:24px;align-items:baseline;width:100%;text-align:left;background:none;border:0;border-top:1px solid var(--line);padding:30px 0;cursor:pointer;transition:background .25s}
+  .row-btn:hover{background:rgba(236,235,231,.035)}
+  .idx{font-family:var(--mono);font-size:13px;color:var(--muted)}
+  .client{font-size:15px;line-height:1.4}
+  .client small{display:block;color:var(--muted);font-size:14px}
+  .title{font-family:var(--serif);font-weight:300;font-size:clamp(1.5rem,2.4vw,2.2rem);line-height:1.15;letter-spacing:-.01em}
+  .result{font-family:var(--serif);font-style:italic;font-weight:300;font-size:1.3rem;line-height:1.3;text-align:right;color:var(--soft)}
+  .plus{position:relative;width:16px;height:16px;justify-self:end;align-self:center}
+  .plus::before,.plus::after{content:"";position:absolute;left:0;top:50%;width:100%;height:1px;background:var(--ink);transition:transform .35s}
+  .plus::after{transform:rotate(90deg)}
+  .row.open .plus::before{transform:rotate(45deg)}
+  .row.open .plus::after{transform:rotate(-45deg)}
+  .detail{display:grid;grid-template-rows:0fr;transition:grid-template-rows .45s ease}
+  .row.open .detail{grid-template-rows:1fr}
+  .detail > div{overflow:hidden}
+  .detail-in{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:40px;padding:6px 0 44px calc(4.5rem + 24px)}
+  .detail h3{font-size:14px;font-weight:500;color:var(--muted);margin-bottom:10px}
+  .detail p{color:var(--soft);font-size:16px;max-width:42ch}
+
+  /* statement */
+  .statement{padding:clamp(100px,18vh,200px) var(--pad);border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:rgba(236,235,231,.03)}
+  .statement p{font-family:var(--serif);font-weight:300;font-size:clamp(2rem,5.2vw,4.8rem);line-height:1.08;letter-spacing:-.025em;max-width:17em;font-variation-settings:'opsz' 72}
+
+  /* how I work */
+  .split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.5fr);gap:clamp(32px,8vw,140px)}
+  .how p{color:var(--soft);padding:26px 0;border-top:1px solid var(--line);max-width:56ch}
+  .how p:last-child{border-bottom:1px solid var(--line)}
+  .how strong{display:block;color:var(--ink);font-weight:500;font-size:19px;margin-bottom:6px}
+
+  /* tools */
+  .tools{display:flex;flex-wrap:wrap;gap:10px 40px;margin-top:40px}
+  .tools span{font-family:var(--serif);font-weight:300;font-size:clamp(1.4rem,2.6vw,2.2rem);letter-spacing:-.01em;color:var(--soft)}
+
+  /* about */
+  .about p{color:var(--soft);max-width:54ch;margin-bottom:20px}
+  .facts{border-top:1px solid var(--line)}
+  .facts div{display:grid;grid-template-columns:9rem 1fr;gap:20px;padding:16px 0;border-bottom:1px solid var(--line);font-size:16px}
+  .facts dt{color:var(--muted)}
+
+  /* contact */
+  .contact h2{max-width:13em;margin-bottom:56px}
+  .contact-grid{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:clamp(32px,8vw,140px)}
+  .field{margin-bottom:28px}
+  .field label{display:block;font-size:14px;color:var(--muted);margin-bottom:4px}
+  .field input,.field textarea{width:100%;background:transparent;border:0;border-bottom:1px solid var(--line);padding:10px 0 14px;font-size:19px;border-radius:0;resize:vertical;transition:border-color .2s}
+  .field input:focus,.field textarea:focus{outline:none;border-color:var(--ink)}
+  .note{margin-top:16px;font-size:14px;color:var(--muted);min-height:1.5em}
+  .direct p{color:var(--soft);margin-bottom:22px}
+  .direct a{display:block;font-family:var(--serif);font-weight:300;font-size:1.7rem;letter-spacing:-.01em;text-decoration:none;padding:12px 0;border-bottom:1px solid var(--line);transition:padding-left .3s}
+  .direct a:hover{padding-left:10px}
+
+  footer{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;padding:28px var(--pad) 36px;border-top:1px solid var(--line);font-size:14px;color:var(--muted)}
+  footer nav{display:flex;gap:24px}
+  footer a{text-decoration:none}
+  footer a:hover{color:var(--ink)}
+
+  @media (max-width:900px){
+    .top nav a:not(:last-child){display:none}
+    .brand span{display:none}
+    .row-btn{grid-template-columns:3rem 1fr 1.5rem;grid-template-areas:"idx client plus" "title title title" "result result result";gap:10px 16px;padding:24px 0}
+    .idx{grid-area:idx}.client{grid-area:client}.title{grid-area:title;margin-top:6px}.result{grid-area:result;text-align:left}.plus{grid-area:plus}
+    .detail-in{grid-template-columns:1fr;gap:24px;padding-left:0}
+    .split,.contact-grid{grid-template-columns:1fr}
+    .facts div{grid-template-columns:7rem 1fr}
+  }
+  @media (prefers-reduced-motion:reduce){
+    html{scroll-behavior:auto}
+    *{transition-duration:.01ms !important}
+  }
+</style>
+</head>
+<body>
+
+<canvas id="scene" aria-hidden="true"></canvas>
+
+<header class="top">
+  <a class="brand" href="#top">Tyrone Miller<span>Chatbots and automation</span></a>
+  <nav aria-label="Main">
+    <a href="#work">Work</a>
+    <a href="#how">Process</a>
+    <a href="#about">About</a>
+    <a href="#contact">Contact</a>
+  </nav>
+</header>
+
+<main id="top">
+
+  <section class="hero" aria-labelledby="hero-title">
+    <h1 id="hero-title">Customers message at 11pm. Something I built answers.</h1>
+    <div class="hero-foot">
+      <div>
+        <p>I'm Tyrone. I build WhatsApp and Telegram bots, and the automations behind them, for small and mid-sized businesses.</p>
+        <div class="status"><span class="dot" aria-hidden="true"></span>Taking on new projects from November</div>
+      </div>
+      <div class="hero-actions">
+        <a class="btn" href="#work">See the work</a>
+        <a class="link" href="#contact">Get in touch</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="work" aria-labelledby="work-title">
+    <div class="block-head">
+      <h2 id="work-title">What I've built for clients</h2>
+      <div class="filters" role="group" aria-label="Filter projects">
+        <button type="button" data-f="all" aria-pressed="true">All</button>
+        <button type="button" data-f="WhatsApp" aria-pressed="false">WhatsApp</button>
+        <button type="button" data-f="Telegram" aria-pressed="false">Telegram</button>
+        <button type="button" data-f="Automation" aria-pressed="false">Automation</button>
+        <span class="count" id="count" aria-live="polite"></span>
+      </div>
+    </div>
+    <div class="list" id="list"></div>
+  </section>
+
+  <section class="statement" aria-label="Summary">
+    <p>Most of my work is taking one repetitive job off someone's plate, then the next one.</p>
+  </section>
+
+  <section class="block" id="how" aria-labelledby="how-title">
+    <div class="split">
+      <h2 id="how-title">How I work</h2>
+      <div class="how">
+        <p><strong>I read your last 100 customer messages first.</strong>It tells me more than a kickoff meeting does. I see what people really ask, and what your team keeps typing out by hand.</p>
+        <p><strong>I launch a small version fast.</strong>Usually within two weeks. Real customers use it, and we fix what they trip over before adding anything new.</p>
+        <p><strong>A person can always step in.</strong>When the bot is stuck, your team gets the whole conversation and takes over. I don't build bots that pretend they can handle everything.</p>
+        <p><strong>You own everything.</strong>The accounts, the code and the documentation are yours. If we stop working together, nothing breaks.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" aria-labelledby="tools-title" style="padding-top:0">
+    <h2 id="tools-title">Tools I use</h2>
+    <div class="tools">
+      <span>WhatsApp Cloud API</span><span>Telegram Bot API</span><span>n8n</span><span>Make</span><span>Twilio</span><span>Stripe</span><span>Shopify</span><span>Airtable</span><span>Google Sheets</span><span>Node.js</span><span>Python</span><span>Supabase</span>
+    </div>
+  </section>
+
+  <section class="block" id="about" aria-labelledby="about-title" style="border-top:1px solid var(--line)">
+    <div class="split about">
+      <h2 id="about-title">About</h2>
+      <div>
+        <p>I'm a developer based in the United States. I started out building websites. Then a friend who runs a shop asked me to connect her orders to WhatsApp, and that turned into most of my work.</p>
+        <p>I work alone, so you talk to the person doing the work. Most projects take two to six weeks from the first call to launch.</p>
+        <dl class="facts" style="margin-top:36px">
+          <div><dt>Based in</dt><dd>United States, working remotely</dd></div>
+          <div><dt>Working since</dt><dd>2019</dd></div>
+          <div><dt>Pricing</dt><dd>Fixed price, quoted after a short call</dd></div>
+          <div><dt>After launch</dt><dd>30 days of fixes and changes included</dd></div>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <section class="block contact" id="contact" aria-labelledby="contact-title" style="border-top:1px solid var(--line)">
+    <h2 id="contact-title">Tell me what's eating your team's time.</h2>
+    <div class="contact-grid">
+      <div>
+        <div class="field"><label for="f-name">Your name</label><input id="f-name" type="text" autocomplete="name"></div>
+        <div class="field"><label for="f-email">Email</label><input id="f-email" type="email" autocomplete="email"></div>
+        <div class="field"><label for="f-msg">What would you like to automate?</label><textarea id="f-msg" rows="4"></textarea></div>
+        <button class="btn" type="button" id="send">Send message</button>
+        <p class="note" id="note" role="status"></p>
+      </div>
+      <div class="direct">
+        <p>Prefer chat? I reply within one working day.</p>
+        <a href="mailto:dreamview29@gmail.com">dreamview29@gmail.com</a>
+        <a href="https://t.me/Aetheria0e">Telegram</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <span>© 2026 Tyrone Miller</span>
+  <nav aria-label="Elsewhere">
+    <a href="https://github.com/">GitHub</a>
+    <a href="https://linkedin.com/">LinkedIn</a>
+  </nav>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+/* ---------- Project data ---------- */
+const projects = [
+  { id:'001', client:'Dental clinic, Porto', year:2025, tags:['WhatsApp'],
+    title:'Appointment booking on WhatsApp', result:'No-shows down from 22% to 9%',
+    problem:'The receptionist spent about three hours a day answering the same booking messages and calling patients back.',
+    built:'A WhatsApp bot that reads free slots from the clinic calendar, then books, moves or cancels appointments. It sends a reminder the day before with a one-tap confirm. Anything it can\'t handle goes to the receptionist with the chat attached.',
+    changed:'No-shows fell from 22% to 9% in the first quarter. Booking messages now take her around 30 minutes a day.' },
+  { id:'002', client:'Online shoe store', year:2025, tags:['WhatsApp','Telegram'],
+    title:'"Where is my order?"', result:'60% fewer support tickets',
+    problem:'Most of the support inbox was people asking where their parcel was.',
+    built:'A bot connected to Shopify and the courier\'s tracking. The customer sends an order number and gets the status in plain words. It also takes return requests and sends the return label.',
+    changed:'Tickets dropped by 60% within two months. The one support person now spends the time on real problems and replying to reviews.' },
+  { id:'003', client:'Real estate agency', year:2024, tags:['WhatsApp'],
+    title:'Lead handling for property enquiries', result:'First reply in under a minute, was 4 hours',
+    problem:'Leads from property portals went cold because agents replied hours later, and about half of them were never serious.',
+    built:'A bot that asks about budget, area, move date and financing, then sends a short summary to the agent\'s CRM. If the lead fits, it offers viewing times straight from the agent\'s calendar.',
+    changed:'Viewings booked went up 35%. Agents stopped chasing people who were only browsing.' },
+  { id:'004', client:'Online course creator', year:2024, tags:['Telegram'],
+    title:'Paid community access', result:'10 hours a week saved',
+    problem:'Every week the founder checked Stripe by hand, then added new members to the private channel and removed the ones who had stopped paying.',
+    built:'A Telegram bot linked to Stripe. A payment unlocks a personal invite link. When a subscription lapses, the member is removed and gets a message with a renewal link.',
+    changed:'It now looks after 1,800 members without anyone touching it. The renewal messages brought back 14% of lapsed members.' },
+  { id:'005', client:'Restaurant group, 3 locations', year:2025, tags:['WhatsApp'],
+    title:'Table bookings and weekend menus', result:'28% more repeat bookings',
+    problem:'Most reservations came by phone during service, so a lot of them were missed.',
+    built:'WhatsApp reservations for all three locations, synced with their booking system. Guests who opt in get the weekend menu every Thursday.',
+    changed:'Repeat bookings rose 28% over six months, and nobody has to pick up the phone mid-service.' },
+  { id:'006', client:'Freight company', year:2024, tags:['Telegram','Automation'],
+    title:'Driver check-ins', result:'Status calls cut by about 90%',
+    problem:'Dispatchers phoned drivers all day to ask where they were and whether a delivery was done.',
+    built:'Drivers tap a button in Telegram (loaded, on the road, delayed, delivered) and send a photo of the delivery note. Everything lands in a shared Google Sheet, and customers can see their own shipments.',
+    changed:'Calls went from around 40 a day to a handful. Customers check the sheet instead of phoning the office.' },
+  { id:'007', client:'Design agency', year:2025, tags:['Automation'],
+    title:'From accepted quote to paid invoice', result:'Payment time down from 19 to 8 days',
+    problem:'Invoices were written by hand and chased by hand, usually a week later than they should have been.',
+    built:'An n8n workflow. An accepted quote creates the invoice in their accounting software and emails it. Polite reminders go out on days 3, 7 and 14, and the paid status goes back into Notion.',
+    changed:'Average payment time dropped from 19 days to 8. The office manager got about five hours a week back.' }
+];
+
+/* ---------- Work list ---------- */
+const list = document.getElementById('list');
+const countEl = document.getElementById('count');
+projects.forEach((p, i) => {
+  const row = document.createElement('div');
+  row.className = 'row';
+  row.dataset.tags = p.tags.join(',');
+  row.innerHTML = `
+    <button class="row-btn" type="button" aria-expanded="false" aria-controls="d-${p.id}">
+      <span class="idx">${p.id}</span>
+      <span class="client">${p.client}<small>${p.tags.join(' and ')}, ${p.year}</small></span>
+      <span class="title">${p.title}</span>
+      <span class="result">${p.result}</span>
+      <span class="plus" aria-hidden="true"></span>
+    </button>
+    <div class="detail" id="d-${p.id}" role="region" aria-label="${p.client} details">
+      <div><div class="detail-in">
+        <section><h3>The problem</h3><p>${p.problem}</p></section>
+        <section><h3>What I built</h3><p>${p.built}</p></section>
+        <section><h3>What changed</h3><p>${p.changed}</p></section>
+      </div></div>
+    </div>`;
+  const btn = row.querySelector('.row-btn');
+  btn.addEventListener('click', () => {
+    const open = row.classList.toggle('open');
+    btn.setAttribute('aria-expanded', open);
+  });
+  list.appendChild(row);
+});
+if (list.firstElementChild) {
+  list.firstElementChild.classList.add('open');
+  list.firstElementChild.querySelector('.row-btn').setAttribute('aria-expanded','true');
+}
+function applyFilter(f){
+  let n = 0;
+  list.querySelectorAll('.row').forEach(r => {
+    const show = f === 'all' || r.dataset.tags.split(',').includes(f);
+    r.hidden = !show; if (show) n++;
+  });
+  countEl.textContent = n + (n === 1 ? ' project' : ' projects');
+}
+document.querySelectorAll('.filters button').forEach(b => {
+  b.addEventListener('click', () => {
+    document.querySelectorAll('.filters button').forEach(x => x.setAttribute('aria-pressed', x === b));
+    applyFilter(b.dataset.f);
+  });
+});
+applyFilter('all');
+
+/* ---------- Contact ---------- */
+document.getElementById('send').addEventListener('click', () => {
+  const n = document.getElementById('f-name').value.trim();
+  const e = document.getElementById('f-email').value.trim();
+  const m = document.getElementById('f-msg').value.trim();
+  const note = document.getElementById('note');
+  if (!n || !e || !m) { note.textContent = 'Add your name, email and a few lines about the project, then send again.'; return; }
+  const body = encodeURIComponent(m + '\n\n' + n + '\n' + e);
+  note.textContent = 'Your email app should open with the message filled in. If it doesn\'t, write to dreamview29@gmail.com.';
+  window.location.href = 'mailto:dreamview29@gmail.com?subject=' + encodeURIComponent('Project enquiry from ' + n) + '&body=' + body;
+});
+
+/* ---------- 3D scene: a conversation floating in depth ---------- */
+(function(){
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const canvas = document.getElementById('scene');
+  if (!window.THREE) { canvas.style.display = 'none'; return; }
+  let renderer;
+  try { renderer = new THREE.WebGLRenderer({ canvas, antialias:true, alpha:true }); }
+  catch(err){ canvas.style.display = 'none'; return; }
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.setClearColor(0x000000, 0);
+
+  const BG = 0x303134;
+  const scene = new THREE.Scene();
+  scene.fog = new THREE.Fog(BG, 10, 42);
+  const FOV = 40, TAN = Math.tan(FOV * Math.PI / 360);
+  const camera = new THREE.PerspectiveCamera(FOV, 1, 0.1, 100);
+  const group = new THREE.Group();
+  scene.add(group);
+
+  const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
+  const PX = 190, R = 30;
+
+  const messages = [
+    { side:'in',  text:'Hi, do you have a table for 4 tonight?', time:'11:42 pm', x:-1.1, y:1.7,  z:0,    d:.5 },
+    { side:'out', text:'Yes, 8:30 works. Want me to hold it under your name?', time:'11:42 pm', x:.5, y:.55, z:-.4, d:1.5 },
+    { side:'in',  text:'Please. Sara.', time:'11:43 pm', x:-1.1, y:-.45, z:-.2, d:2.5 },
+    { side:'out', text:'Done. Table for 4 at 8:30, under Sara. I\'ll text you a reminder at 6.', time:'11:43 pm', x:.5, y:-1.65, z:-.6, d:3.5 },
+    { side:'in',  text:'Where\'s my order? It\'s been a week.', time:'9:15 am', x:-1.3, y:.6, z:-6, d:2 },
+    { side:'out', text:'It left the warehouse Tuesday. The courier shows delivery tomorrow.', time:'9:15 am', x:.9, y:-.5, z:-8.5, d:2 },
+    { side:'in',  text:'Can I move Thursday\'s cleaning to Friday?', time:'2:08 pm', x:-1, y:1.2, z:-11, d:2 },
+    { side:'out', text:'Friday 10:00 or 15:30 are free. Which one?', time:'2:08 pm', x:1.1, y:.1, z:-13.5, d:2 },
+    { side:'in',  text:'/start', time:'7:30 pm', x:-1.2, y:-.6, z:-16, d:2 },
+    { side:'out', text:'Welcome. Send your payment receipt and I\'ll unlock the group.', time:'7:30 pm', x:1, y:.5, z:-18.5, d:2 },
+    { side:'in',  text:'Budget around 300k, near the river, moving in March.', time:'6:47 pm', x:-1.1, y:1, z:-21, d:2 },
+    { side:'out', text:'Got it. 3 apartments match. Viewing on Saturday at 11?', time:'6:47 pm', x:1, y:-.2, z:-23.5, d:2 }
+  ];
+
+  function roundRect(ctx,x,y,w,h,r){
+    ctx.beginPath(); ctx.moveTo(x+r,y);
+    ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r);
+    ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath();
+  }
+
+  const items = [];
+  function build(){
+    const total = messages.length;
+    messages.forEach((m, i) => {
+      const out = m.side === 'out';
+      const fill = out ? '#e8e4da' : '#4b4c50';
+      const edge = out ? '#8d897f' : '#37383c';
+      const ink  = out ? '#26262a' : '#f0efec';
+      const meta = out ? 'rgba(38,38,42,.55)' : 'rgba(240,239,236,.5)';
+      const fontStr = '500 27px "Hanken Grotesk", system-ui, sans-serif';
+
+      const probe = document.createElement('canvas').getContext('2d');
+      probe.font = fontStr;
+      const maxW = 370, lines = []; let cur = '';
+      m.text.split(' ').forEach(w => {
+        const t = cur ? cur + ' ' + w : w;
+        if (probe.measureText(t).width > maxW && cur) { lines.push(cur); cur = w; } else cur = t;
+      });
+      lines.push(cur);
+      const textW = Math.max(...lines.map(l => probe.measureText(l).width), 110);
+      const padX = 30, padTop = 24, lh = 37, metaH = 26;
+      const w = Math.ceil(textW + padX*2), h = padTop + lines.length*lh + metaH + 10;
+
+      const S = 2, c = document.createElement('canvas');
+      c.width = w*S; c.height = h*S;
+      const ctx = c.getContext('2d');
+      ctx.scale(S,S);
+      roundRect(ctx,0,0,w,h,R); ctx.fillStyle = fill; ctx.fill();
+      ctx.font = fontStr; ctx.fillStyle = ink; ctx.textBaseline = 'alphabetic';
+      lines.forEach((l, k) => ctx.fillText(l, padX, padTop + 27 + k*lh));
+      ctx.font = '400 17px "Hanken Grotesk", system-ui, sans-serif';
+      ctx.fillStyle = meta; ctx.textAlign = 'right';
+      ctx.fillText(m.time, w - padX, h - 16);
+
+      const tex = new THREE.CanvasTexture(c);
+      tex.minFilter = THREE.LinearFilter; tex.generateMipmaps = false;
+      tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+
+      const ww = w/PX, hh = h/PX, r = R/PX;
+      const sh = new THREE.Shape(), x = -ww/2, y = -hh/2;
+      sh.moveTo(x+r,y); sh.lineTo(x+ww-r,y); sh.quadraticCurveTo(x+ww,y,x+ww,y+r);
+      sh.lineTo(x+ww,y+hh-r); sh.quadraticCurveTo(x+ww,y+hh,x+ww-r,y+hh);
+      sh.lineTo(x+r,y+hh); sh.quadraticCurveTo(x,y+hh,x,y+hh-r);
+      sh.lineTo(x,y+r); sh.quadraticCurveTo(x,y,x+r,y);
+      const geo = new THREE.ExtrudeGeometry(sh, { depth:.09, bevelEnabled:false, curveSegments:8 });
+      geo.translate(0,0,-.045);
+
+      const faceMat = new THREE.MeshBasicMaterial({ color:fill, transparent:true, opacity:0 });
+      const sideMat = new THREE.MeshBasicMaterial({ color:edge, transparent:true, opacity:0 });
+      const slab = new THREE.Mesh(geo, [faceMat, sideMat]);
+      const planeMat = new THREE.MeshBasicMaterial({ map:tex, transparent:true, opacity:0, depthWrite:false });
+      const plane = new THREE.Mesh(new THREE.PlaneGeometry(ww,hh), planeMat);
+      plane.position.z = .047;
+      slab.renderOrder = (total - i)*2; plane.renderOrder = (total - i)*2 + 1;
+
+      const g = new THREE.Group();
+      g.add(slab); g.add(plane);
+      group.add(g);
+      items.push({ g, mats:[faceMat, sideMat, planeMat], x:m.x, y:m.y, z:m.z, delay:m.d + (i < 4 ? 0 : 1.5),
+                   rot: out ? -.2 : .2 });
+    });
+
+    // sparse dust for depth
+    const N = 220, pos = new Float32Array(N*3);
+    for (let i = 0; i < N; i++) {
+      pos[i*3]   = (Math.random()-.5)*16;
+      pos[i*3+1] = (Math.random()-.5)*9;
+      pos[i*3+2] = 6 - Math.random()*38;
+    }
+    const pg = new THREE.BufferGeometry();
+    pg.setAttribute('position', new THREE.BufferAttribute(pos,3));
+    group.add(new THREE.Points(pg, new THREE.PointsMaterial({ color:0xa2a29e, size:.035, transparent:true, opacity:.55 })));
+  }
+
+  const L = { baseZ:8, s:1, camX:0, camY:0 };
+  function layout(){
+    const w = window.innerWidth, h = window.innerHeight;
+    renderer.setSize(w, h, false);
+    camera.aspect = w/h; camera.updateProjectionMatrix();
+    const a = w/h;
+    if (a > .95) {
+      L.baseZ = 8; const hw = L.baseZ*TAN*a;
+      L.s = clamp(hw/4.8, .55, 1.1); L.camX = -.3*L.s - hw*.55; L.camY = 0;
+    } else {
+      L.baseZ = 12; const hw = L.baseZ*TAN*a;
+      L.s = Math.min(1, hw*.95/2.0); L.camX = -.3*L.s; L.camY = -.9;
+    }
+    group.scale.setScalar(L.s);
+  }
+
+  let ptx = 0, pty = 0, mx = 0, my = 0, sp = 0, started = 0;
+  window.addEventListener('pointermove', e => {
+    ptx = e.clientX / window.innerWidth * 2 - 1;
+    pty = e.clientY / window.innerHeight * 2 - 1;
+  }, { passive:true });
+  window.addEventListener('resize', layout);
+
+  function frame(now){
+    const t = (now - started) / 1000;
+    const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+    const target = maxScroll > 0 ? window.scrollY / maxScroll : 0;
+    sp += (target - sp) * (reduce ? 1 : .07);
+    mx += (ptx - mx) * (reduce ? 0 : .05);
+    my += (pty - my) * (reduce ? 0 : .05);
+
+    const f = clamp((window.scrollY - window.innerHeight*.4) / (window.innerHeight*.6), 0, 1);
+    camera.position.x = L.camX*(1 - f*.9) + mx*.35;
+    camera.position.y = L.camY*(1 - f) - my*.2 + Math.sin(sp*6)*.15;
+    camera.position.z = L.baseZ + (-28*L.s - L.baseZ)*sp;
+    canvas.style.opacity = (1 - .72*f).toFixed(3);
+
+    items.forEach((it, i) => {
+      const a = reduce ? 1 : clamp((t - it.delay)/.9, 0, 1);
+      const e = 1 - Math.pow(1 - a, 3);
+      const bob = reduce ? 0 : Math.sin(t*.6 + i*1.7)*.06;
+      it.g.position.set(it.x, it.y - (1 - e)*.6 + bob, it.z);
+      it.g.rotation.y = it.rot + mx*.12;
+      it.g.rotation.x = -my*.06 + (reduce ? 0 : Math.sin(t*.5 + i)*.015);
+      it.g.scale.setScalar(.9 + .1*e);
+      for (let k = 0; k < 3; k++) it.mats[k].opacity = e;
+    });
+
+    renderer.render(scene, camera);
+    requestAnimationFrame(frame);
+  }
+
+  const fontsReady = Promise.race([
+    Promise.all([
+      document.fonts.load('500 27px "Hanken Grotesk"'),
+      document.fonts.load('400 17px "Hanken Grotesk"')
+    ]),
+    new Promise(r => setTimeout(r, 1800))
+  ]);
+  fontsReady.then(() => {
+    build(); layout();
+    started = performance.now();
+    requestAnimationFrame(frame);
+  });
+})();
+</script>
+</body>
+</html>
